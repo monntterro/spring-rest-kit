@@ -1,16 +1,16 @@
 package space.monntterro.springrestkit.kit;
 
-import space.monntterro.springrestkit.core.BaseMapper;
+import space.monntterro.springrestkit.core.BaseKitMapper;
 import space.monntterro.springrestkit.method.*;
 
-public abstract class CrudControllerKit<TEntity, TId, TDto> extends AbstractControllerKit<TEntity, TId, TDto> implements
+public abstract class CrudKitController<TEntity, TId, TDto> extends AbstractKitController<TEntity, TId, TDto> implements
         GetOne<TEntity, TId, TDto>,
         GetAll<TEntity, TId, TDto>,
         PostOne<TEntity, TId, TDto>,
         PutOne<TEntity, TId, TDto>,
         DeleteOne<TEntity, TId, TDto> {
 
-    public CrudControllerKit(AbstractServiceKit<TEntity, TId, TDto> service, BaseMapper<TEntity, TDto> mapper) {
+    public CrudKitController(AbstractKitService<TEntity, TId, TDto> service, BaseKitMapper<TEntity, TDto> mapper) {
         super(service, mapper);
     }
 }
