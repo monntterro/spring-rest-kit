@@ -2,9 +2,9 @@ package space.monntterro.springrestkit.core;
 
 import space.monntterro.springrestkit.kit.AbstractServiceKit;
 
-public interface BaseRestController<E, ID, D> {
+public interface BaseRestController<TEntity, TId, TDto> {
 
-    AbstractServiceKit<E, ID, D> getService();
+    AbstractServiceKit<TEntity, TId, TDto> getService();
 
-    BaseMapper<E, D> getMapper();
+    BaseMapper<TEntity, TDto> getMapper();
 }
