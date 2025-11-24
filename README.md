@@ -10,27 +10,49 @@ Spring REST Kit предоставляет гибкую структуру дл�
 
 ### 🛠 Основные компоненты
 
-#### Базовые интерфейсы и классы
+#### Интерфейсы
 
-* **RestKit** — базовый интерфейс, предоставляющий доступ к сервису и мапперу
-* **AbstractRestController** — абстрактный контроллер, реализующий `RestKit`
-* **ServiceKit** — базовый сервисный слой с готовой бизнес-логикой
-* **RepositoryKit** — интерфейс репозитория для работы с данными
-* **MapperKit** — интерфейс маппера для преобразования Entity ↔ Model
+* **BaseRestController<E, ID, D>** — базовый интерфейс контроллера, предоставляет доступ к `ServiceKit` и `BaseMapper`.
+  Используется
+  как основа для всех REST-контроллеров.
 
-#### Модульные HTTP-методы
+* **BaseRepository<E, ID>** — интерфейс репозитория, определяет контракт для работы с данными (findById, findAll, save,
+  deleteById). Совместим с JpaRepository.
 
-Каждый HTTP-метод представлен отдельным интерфейсом, что позволяет гибко комбинировать функциональность:
+* **BaseMapper<E, D>** — интерфейс маппера для преобразования между Entity и DTO. Определяет методы: `toDto()`,
+  `toEntity()`, `updateWithNull()`.
 
-* **GetOne** — `GET /{id}` — получение одного объекта
-* **GetAll** — `GET /` — получение списка объектов
-* **PostOne** — `POST /` — создание объекта
-* **PutOne** — `PUT /{id}` — обновление объекта
-* **DeleteOne** — `DELETE /{id}` — удаление объекта
+#### Модульные HTTP-методы (интерфейсы)
+
+Каждый HTTP-метод представлен отдельным интерфейсом с default-реализацией. Все расширяют `BaseRestController<E, ID, D>`:
+
+* **GetOne<E, ID, D>** — `GET /{id}` — получение одного объекта по ID. Возвращает DTO или throws exception если не
+  найден.
+
+* **GetAll<E, ID, D>** — `GET /` — получение списка всех объектов. Возвращает Collection<D>.
+
+* **PostOne<E, ID, D>** — `POST /` — создание нового объекта. Принимает DTO в RequestBody, возвращает созданный DTO.
+
+* **PutOne<E, ID, D>** — `PUT /{id}` — обновление существующего объекта. Принимает ID и DTO, возвращает обновлённый DTO.
+
+* **DeleteOne<E, ID, D>** — `DELETE /{id}` — удаление объекта по ID. Возвращает удалённый DTO если объект был найден,
+  иначе выбрасывает ошибку.
+
+#### Абстрактные классы
+
+* **AbstractControllerKit<E, ID, D>** — базовый абстрактный класс для контроллеров. Реализует `BaseRestController`,
+  хранит
+  ссылки
+  на service и mapper. Предоставляет методы `getService()` и `getMapper()`.
+
+* **AbstractServiceKit<E, ID, D>** — базовый абстрактный класс сервисного слоя. Содержит готовую реализацию
+  бизнес-логики для
+  CRUD-операций: getOne, getAll, createOne, updateOne, deleteOne. Работает с Entity.
 
 #### Готовые наборы
 
-* **CrudKit** — полный набор CRUD-операций (композиция всех интерфейсов выше)
+* **CrudKit<E, ID, D>** — готовый абстрактный класс контроллера с полным набором CRUD-операций. Расширяет
+  `AbstractControllerKit` и реализует все интерфейсы HTTP-методов (GetOne, GetAll, PostOne, PutOne, DeleteOne).
 
 ## 🏗 Использование через Maven Local
 
@@ -63,6 +85,7 @@ dependencies {
 ### 1. Entity
 
 ```java
+
 @Entity
 @Table(name = "users")
 public class UserEntity {
@@ -76,10 +99,10 @@ public class UserEntity {
 }
 ```
 
-### 2. DTO (Model)
+### 2. DTO
 
 ```java
-public class UserModel {
+public class UserDto {
     private Long id;
     private String name;
     private String email;
@@ -87,7 +110,7 @@ public class UserModel {
 }
 ```
 
-### 3. MapperKit
+### 3. BaseMapper
 
 Можно реализовать вручную или использовать MapStruct — сигнатуры методов совместимы.
 
@@ -95,30 +118,31 @@ public class UserModel {
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,
         componentModel = MappingConstants.ComponentModel.SPRING)
-public interface UserMapper extends MapperKit<UserEntity, UserModel> {
+public interface UserMapper extends BaseMapper<UserEntity, UserDto> {
 
-    UserEntity toEntity(UserModel model);
+    UserEntity toEntity(UserDto dto);
 
-    UserModel toModel(UserEntity entity);
+    UserDto toDto(UserEntity entity);
 
-    UserEntity updateWithNull(@MappingTarget UserEntity target, UserModel model);
+    UserEntity updateWithNull(@MappingTarget UserEntity target, UserDto dto);
 }
 ```
 
-### 4. RepositoryKit
+### 4. BaseRepository
 
-Обычно достаточно расширить `JpaRepository` и добавить `RepositoryKit`.
+Обычно достаточно расширить `JpaRepository` и добавить `BaseRepository`.
 
 ```java
-public interface UserRepository extends JpaRepository<UserEntity, Long>, RepositoryKit<UserEntity, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long>, BaseRepository<UserEntity, Long> {
 }
 ```
 
-### 5. ServiceKit
+### 5. AbstractServiceKit
 
 ```java
+
 @Service
-public class UserService extends ServiceKit<UserEntity, Long, UserModel> {
+public class UserService extends AbstractServiceKit<UserEntity, Long, UserDto> {
 
     public UserService(UserRepository repository, UserMapper mapper) {
         super(repository, mapper);
@@ -131,9 +155,10 @@ public class UserService extends ServiceKit<UserEntity, Long, UserModel> {
 #### Вариант A: Полный CRUD с CrudKit
 
 ```java
+
 @RestController
 @RequestMapping("/api/users")
-public class UserController extends CrudKit<UserEntity, Long, UserModel> {
+public class UserController extends CrudKit<UserEntity, Long, UserDto> {
 
     public UserController(UserService service, UserMapper mapper) {
         super(service, mapper);
@@ -145,12 +170,14 @@ public class UserController extends CrudKit<UserEntity, Long, UserModel> {
 
 ```java
 
+import java.util.Collection;
+
 @RestController
 @RequestMapping("/api/users")
-public class CustomUserController extends AbstractRestController<UserEntity, Long, UserModel>
-        implements GetAll<UserEntity, Long, UserModel>,
-        PostOne<UserEntity, Long, UserModel>,
-        PutOne<UserEntity, Long, UserModel> {
+public class CustomUserController extends AbstractControllerKit<UserEntity, Long, UserDto> implements
+        GetAll<UserEntity, Long, UserDto>,
+        PostOne<UserEntity, Long, UserDto>,
+        PutOne<UserEntity, Long, UserDto> {
 
     public CustomUserController(UserService service, UserMapper mapper) {
         super(service, mapper);
@@ -158,7 +185,7 @@ public class CustomUserController extends AbstractRestController<UserEntity, Lon
 
     // Можно добавлять собственные методы
     @GetMapping("/search")
-    public Collection<UserModel> searchByName(@RequestParam String name) {
+    public Collection<UserDto> searchByName(@RequestParam String name) {
         // Кастомная логика
     }
 }
@@ -188,14 +215,14 @@ public class CustomUserController extends AbstractRestController<UserEntity, Lon
 
 ### Разделение ответственности
 
-* **Controller** — обработка HTTP-запросов и преобразование Model
+* **Controller** — обработка HTTP-запросов и преобразование DTO
 * **Service** — бизнес-логика и работа с Entity
 * **Repository** — доступ к данным
-* **Mapper** — преобразование Entity <-> Model
+* **Mapper** — преобразование Entity <-> DTO
 
 ## 📌 Требования
 
-_Сама библиотека не несет в себе зависимости_
+_Сама библиотека не несет в себе зависимости._
 
 * Java 17+
 * Spring Boot 3.x
@@ -210,7 +237,7 @@ _Сама библиотека не несет в себе зависимост�
 
 @RestController
 @RequestMapping("/api/users")
-public class EnhancedUserController extends CrudKit<UserEntity, Long, UserModel> {
+public class EnhancedUserController extends CrudKit<UserEntity, Long, UserDto> {
 
     public EnhancedUserController(UserService service, UserMapper mapper) {
         super(service, mapper);
@@ -218,17 +245,17 @@ public class EnhancedUserController extends CrudKit<UserEntity, Long, UserModel>
 
     // Переопределение стандартного метода
     @Override
-    public Collection<UserModel> getAll() {
+    public Collection<UserDto> getAll() {
         // Своя логика, например, с сортировкой
         return getService().getAll().stream()
                 .sorted(Comparator.comparing(UserEntity::getName))
-                .map(getMapper()::toModel)
+                .map(getMapper()::toDto)
                 .toList();
     }
 
     // Добавление нового эндпоинта
     @GetMapping("/active")
-    public Collection<UserModel> getActiveUsers() {
+    public Collection<UserDto> getActiveUsers() {
         // Кастомная логика
     }
 }
