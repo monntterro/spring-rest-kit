@@ -1,16 +1,16 @@
 package space.monntterro.springrestkit.kit;
 
-import space.monntterro.springrestkit.core.BaseMapper;
-import space.monntterro.springrestkit.core.BaseRepository;
+import space.monntterro.springrestkit.core.BaseKitMapper;
+import space.monntterro.springrestkit.core.BaseKitRepository;
 
 import java.util.Collection;
 import java.util.Optional;
 
-public abstract class AbstractServiceKit<TEntity, TId, TDto> {
-    private final BaseRepository<TEntity, TId> repository;
-    private final BaseMapper<TEntity, TDto> mapper;
+public abstract class AbstractKitService<TEntity, TId, TDto> {
+    private final BaseKitRepository<TEntity, TId> repository;
+    private final BaseKitMapper<TEntity, TDto> mapper;
 
-    public AbstractServiceKit(BaseRepository<TEntity, TId> repository, BaseMapper<TEntity, TDto> mapper) {
+    public AbstractKitService(BaseKitRepository<TEntity, TId> repository, BaseKitMapper<TEntity, TDto> mapper) {
         this.repository = repository;
         this.mapper = mapper;
     }
