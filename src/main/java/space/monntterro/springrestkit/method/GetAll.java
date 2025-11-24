@@ -5,10 +5,10 @@ import space.monntterro.springrestkit.core.BaseRestController;
 
 import java.util.Collection;
 
-public interface GetAll<E, ID, D> extends BaseRestController<E, ID, D> {
+public interface GetAll<TEntity, TId, TDto> extends BaseRestController<TEntity, TId, TDto> {
 
     @GetMapping
-    default Collection<D> getAll() {
+    default Collection<TDto> getAll() {
         return getService().getAll().stream()
                 .map(getMapper()::toDto)
                 .toList();

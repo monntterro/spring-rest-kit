@@ -6,35 +6,35 @@ import space.monntterro.springrestkit.core.BaseRepository;
 import java.util.Collection;
 import java.util.Optional;
 
-public abstract class AbstractServiceKit<E, ID, D> {
-    private final BaseRepository<E, ID> repository;
-    private final BaseMapper<E, D> mapper;
+public abstract class AbstractServiceKit<TEntity, TId, TDto> {
+    private final BaseRepository<TEntity, TId> repository;
+    private final BaseMapper<TEntity, TDto> mapper;
 
-    public AbstractServiceKit(BaseRepository<E, ID> repository, BaseMapper<E, D> mapper) {
+    public AbstractServiceKit(BaseRepository<TEntity, TId> repository, BaseMapper<TEntity, TDto> mapper) {
         this.repository = repository;
         this.mapper = mapper;
     }
 
-    public Optional<E> getOne(ID id) {
+    public Optional<TEntity> getOne(TId id) {
         return repository.findById(id);
     }
 
-    public Collection<E> getAll() {
+    public Collection<TEntity> getAll() {
         return repository.findAll();
     }
 
-    public E createOne(E entity) {
+    public TEntity createOne(TEntity entity) {
         return repository.save(entity);
     }
 
-    public E updateOne(ID id, D dto) {
-        E entity = repository.findById(id).orElseThrow();
+    public TEntity updateOne(TId id, TDto dto) {
+        TEntity entity = repository.findById(id).orElseThrow();
         entity = mapper.updateWithNull(entity, dto);
         return repository.save(entity);
     }
 
-    public E deleteOne(ID id) {
-        E entity = repository.findById(id).orElseThrow();
+    public TEntity deleteOne(TId id) {
+        TEntity entity = repository.findById(id).orElseThrow();
         repository.deleteById(id);
         return entity;
     }

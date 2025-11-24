@@ -3,13 +3,13 @@ package space.monntterro.springrestkit.core;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface BaseRepository<E, ID> {
+public interface BaseRepository<TEntity, TId> {
 
-    Optional<E> findById(ID id);
+    Optional<TEntity> findById(TId id);
 
-    Collection<E> findAll();
+    Collection<TEntity> findAll();
 
-    E save(E entity);
+    TEntity save(TEntity entity);
 
-    void deleteById(ID id);
+    void deleteById(TId id);
 }
