@@ -3,11 +3,11 @@ package space.monntterro.springrestkit.kit;
 import space.monntterro.springrestkit.core.BaseMapper;
 import space.monntterro.springrestkit.core.BaseRestController;
 
-public abstract class AbstractControllerKitBase<E, ID, D> implements BaseRestController<E, ID, D> {
+public abstract class AbstractControllerKit<E, ID, D> implements BaseRestController<E, ID, D> {
     private final AbstractServiceKit<E, ID, D> service;
     private final BaseMapper<E, D> mapper;
 
-    public AbstractControllerKitBase(AbstractServiceKit<E, ID, D> service, BaseMapper<E, D> mapper) {
+    public AbstractControllerKit(AbstractServiceKit<E, ID, D> service, BaseMapper<E, D> mapper) {
         this.service = service;
         this.mapper = mapper;
     }
