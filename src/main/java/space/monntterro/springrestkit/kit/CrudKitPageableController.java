@@ -1,8 +1,9 @@
-package space.monntterro.springrestkit.kit.controller;
+package space.monntterro.springrestkit.kit;
 
+import space.monntterro.springrestkit.core.impl.controller.AbstractKitPageableController;
+import space.monntterro.springrestkit.core.impl.service.AbstractKitPageableService;
 import space.monntterro.springrestkit.core.mapper.BaseKitMapper;
-import space.monntterro.springrestkit.kit.service.AbstractKitPageableService;
-import space.monntterro.springrestkit.method.*;
+import space.monntterro.springrestkit.endpoints.*;
 
 public class CrudKitPageableController<TEntity, TId, TDto> extends AbstractKitPageableController<TEntity, TId, TDto> implements
         GetOne<TEntity, TId, TDto>,

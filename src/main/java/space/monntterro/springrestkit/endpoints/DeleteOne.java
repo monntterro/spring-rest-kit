@@ -1,4 +1,4 @@
-package space.monntterro.springrestkit.method;
+package space.monntterro.springrestkit.endpoints;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

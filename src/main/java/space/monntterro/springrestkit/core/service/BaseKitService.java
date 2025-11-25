@@ -1,10 +1,9 @@
 package space.monntterro.springrestkit.core.service;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface BaseKitService<TEntity, TId, TDto> {
-    Optional<TEntity> getOne(TId id);
+    TEntity getOne(TId id);
 
     Collection<TEntity> getAll();
 
