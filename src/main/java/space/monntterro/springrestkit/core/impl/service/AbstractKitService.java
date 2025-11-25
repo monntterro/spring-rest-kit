@@ -1,6 +1,6 @@
 package space.monntterro.springrestkit.core.impl.service;
 
-import space.monntterro.springrestkit.core.exception.NotFoundException;
+import space.monntterro.springrestkit.core.exception.NotFoundKitException;
 import space.monntterro.springrestkit.core.mapper.BaseKitMapper;
 import space.monntterro.springrestkit.core.repository.BaseKitRepository;
 import space.monntterro.springrestkit.core.service.BaseKitService;
@@ -19,7 +19,7 @@ public abstract class AbstractKitService<TEntity, TId, TDto> implements BaseKitS
 
     @Override
     public TEntity getOne(TId id) {
-        return repository.findById(id).orElseThrow(() -> new NotFoundException(id, getEntityClass()));
+        return repository.findById(id).orElseThrow(() -> new NotFoundKitException(id, getEntityClass()));
     }
 
     @Override
@@ -35,7 +35,7 @@ public abstract class AbstractKitService<TEntity, TId, TDto> implements BaseKitS
     @Override
     public TEntity updateOne(TId id, TDto dto) {
         TEntity entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(id, getEntityClass()));
+                .orElseThrow(() -> new NotFoundKitException(id, getEntityClass()));
         entity = mapper.updateWithNull(entity, dto);
         return repository.save(entity);
     }
@@ -43,7 +43,7 @@ public abstract class AbstractKitService<TEntity, TId, TDto> implements BaseKitS
     @Override
     public TEntity deleteOne(TId id) {
         TEntity entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(id, getEntityClass()));
+                .orElseThrow(() -> new NotFoundKitException(id, getEntityClass()));
         repository.deleteById(id);
         return entity;
     }
