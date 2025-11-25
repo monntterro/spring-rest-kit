@@ -208,7 +208,7 @@ public class ProductController extends AbstractKitController<ProductEntity, Long
 }
 ```
 
-### Обработка исключений (обязательно!)
+### Обработка исключений
 
 ```java
 
