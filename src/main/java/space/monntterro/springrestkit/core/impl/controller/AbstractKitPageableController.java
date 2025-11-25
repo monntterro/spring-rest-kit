@@ -1,9 +1,9 @@
-package space.monntterro.springrestkit.kit.controller;
+package space.monntterro.springrestkit.core.impl.controller;
 
 import space.monntterro.springrestkit.core.controller.BaseKitPageableRestController;
+import space.monntterro.springrestkit.core.impl.service.AbstractKitPageableService;
 import space.monntterro.springrestkit.core.mapper.BaseKitMapper;
 import space.monntterro.springrestkit.core.service.BaseKitPageableService;
-import space.monntterro.springrestkit.kit.service.AbstractKitPageableService;
 
 public class AbstractKitPageableController<TEntity, TId, TDto> implements BaseKitPageableRestController<TEntity, TId, TDto> {
     private final AbstractKitPageableService<TEntity, TId, TDto> service;

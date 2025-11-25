@@ -1,4 +1,4 @@
-package space.monntterro.springrestkit.method;
+package space.monntterro.springrestkit.endpoints;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,7 +17,7 @@ public interface GetOne<TEntity, TId, TDto> extends BaseKitRestController<TEntit
     })
     @GetMapping("/{id}")
     default TDto getOne(@PathVariable("id") TId id) {
-        TEntity entity = getService().getOne(id).orElseThrow();
+        TEntity entity = getService().getOne(id);
         return getMapper().toDto(entity);
     }
 }

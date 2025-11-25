@@ -1,4 +1,4 @@
-package space.monntterro.springrestkit.kit.service;
+package space.monntterro.springrestkit.core.impl.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
