@@ -1,4 +1,4 @@
-package space.monntterro.springrestkit.core;
+package space.monntterro.springrestkit.core.mapper;
 
 public interface BaseKitMapper<TEntity, TDto> {
     TDto toDto(TEntity entity);

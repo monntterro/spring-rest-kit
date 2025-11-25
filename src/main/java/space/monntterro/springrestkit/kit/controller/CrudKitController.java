@@ -1,6 +1,7 @@
-package space.monntterro.springrestkit.kit;
+package space.monntterro.springrestkit.kit.controller;
 
-import space.monntterro.springrestkit.core.BaseKitMapper;
+import space.monntterro.springrestkit.core.mapper.BaseKitMapper;
+import space.monntterro.springrestkit.kit.service.AbstractKitService;
 import space.monntterro.springrestkit.method.*;
 
 public abstract class CrudKitController<TEntity, TId, TDto> extends AbstractKitController<TEntity, TId, TDto> implements

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.GetMapping;
-import space.monntterro.springrestkit.core.BaseKitRestController;
+import space.monntterro.springrestkit.core.controller.BaseKitRestController;
 
 import java.util.Collection;
 

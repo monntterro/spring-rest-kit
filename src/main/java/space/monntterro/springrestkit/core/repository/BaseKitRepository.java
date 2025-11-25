@@ -1,4 +1,4 @@
-package space.monntterro.springrestkit.core;
+package space.monntterro.springrestkit.core.repository;
 
 import java.util.Collection;
 import java.util.Optional;
