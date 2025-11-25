@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import space.monntterro.springrestkit.core.BaseKitRestController;
+import space.monntterro.springrestkit.core.controller.BaseKitRestController;
 
 public interface PostOne<TEntity, TId, TDto> extends BaseKitRestController<TEntity, TId, TDto> {
 
