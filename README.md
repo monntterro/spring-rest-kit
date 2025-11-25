@@ -34,6 +34,9 @@ Spring REST Kit предоставляет гибкую структуру дл�
 
 * **BaseKitMapper<TEntity, TDto>** — интерфейс маппера для преобразования между Entity и DTO.
 
+#### Обработчик ошибок
+
+* **BaseKitExceptionHandler** — обработка ошибок `ApiKitException`
 Библиотека предоставляет два варианта архитектуры:
 
 1. **Без пагинации**: `CrudKitController` + `AbstractKitService` + `BaseKitRepository`
@@ -76,9 +79,16 @@ public interface UserMapper extends BaseKitMapper<UserEntity, UserDto> {
 
     UserEntity updateWithNull(@MappingTarget UserEntity target, UserDto dto);
 }
+
+// Exception handler
+@RestControllerAdvice
+public class GlobalExceptionHandler implements BaseKitExceptionHandler {
+}
 ```
 
 ### ✨ Пример контроллера с пагинацией
+
+Изменить только контроллер, сервис и репозиторий на Pageable версии:
 
 ```java
 
