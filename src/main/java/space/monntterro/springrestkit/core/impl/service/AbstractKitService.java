@@ -19,7 +19,7 @@ public abstract class AbstractKitService<TEntity, TId, TDto> implements BaseKitS
 
     @Override
     public TEntity getOne(TId id) {
-        return repository.findById(id).orElseThrow(() -> new NotFoundException(getNotFoundExceptionMessage(id)));
+        return repository.findById(id).orElseThrow(() -> new NotFoundException(id, getEntityClass()));
     }
 
     @Override
@@ -35,7 +35,7 @@ public abstract class AbstractKitService<TEntity, TId, TDto> implements BaseKitS
     @Override
     public TEntity updateOne(TId id, TDto dto) {
         TEntity entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(getNotFoundExceptionMessage(id)));
+                .orElseThrow(() -> new NotFoundException(id, getEntityClass()));
         entity = mapper.updateWithNull(entity, dto);
         return repository.save(entity);
     }
@@ -43,19 +43,16 @@ public abstract class AbstractKitService<TEntity, TId, TDto> implements BaseKitS
     @Override
     public TEntity deleteOne(TId id) {
         TEntity entity = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(getNotFoundExceptionMessage(id)));
+                .orElseThrow(() -> new NotFoundException(id, getEntityClass()));
         repository.deleteById(id);
         return entity;
     }
 
     /**
-     * Returns a message for a Not Found exception based on the generic type TEntity and ID
+     * Returns the class of the generic TEntity
      */
-    public String getNotFoundExceptionMessage(TId id) {
-        return "%s with id=%s not found".formatted(
-                ((Class<?>) ((ParameterizedType) this.getClass()
-                        .getGenericSuperclass()).getActualTypeArguments()[0]).getSimpleName(),
-                id.toString()
-        );
+    @SuppressWarnings("unchecked")
+    private Class<TEntity> getEntityClass() {
+        return (Class<TEntity>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 }
