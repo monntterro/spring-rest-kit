@@ -1,9 +1,9 @@
 package space.monntterro.springrestkit.kit;
 
-import space.monntterro.springrestkit.core.impl.controller.AbstractKitController;
-import space.monntterro.springrestkit.core.impl.service.AbstractKitService;
 import space.monntterro.springrestkit.core.mapper.BaseKitMapper;
 import space.monntterro.springrestkit.endpoints.*;
+import space.monntterro.springrestkit.impl.controller.AbstractKitController;
+import space.monntterro.springrestkit.impl.service.AbstractKitService;
 
 public abstract class CrudKitController<TEntity, TId, TDto> extends AbstractKitController<TEntity, TId, TDto> implements
         GetOne<TEntity, TId, TDto>,

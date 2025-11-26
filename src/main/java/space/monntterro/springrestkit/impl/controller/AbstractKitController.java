@@ -1,9 +1,9 @@
-package space.monntterro.springrestkit.core.impl.controller;
+package space.monntterro.springrestkit.impl.controller;
 
 import space.monntterro.springrestkit.core.controller.BaseKitRestController;
-import space.monntterro.springrestkit.core.impl.service.AbstractKitService;
 import space.monntterro.springrestkit.core.mapper.BaseKitMapper;
 import space.monntterro.springrestkit.core.service.BaseKitService;
+import space.monntterro.springrestkit.impl.service.AbstractKitService;
 
 public abstract class AbstractKitController<TEntity, TId, TDto> implements BaseKitRestController<TEntity, TId, TDto> {
     private final AbstractKitService<TEntity, TId, TDto> service;

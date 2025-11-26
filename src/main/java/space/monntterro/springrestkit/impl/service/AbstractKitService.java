@@ -1,4 +1,4 @@
-package space.monntterro.springrestkit.core.impl.service;
+package space.monntterro.springrestkit.impl.service;
 
 import space.monntterro.springrestkit.core.exception.NotFoundKitException;
 import space.monntterro.springrestkit.core.mapper.BaseKitMapper;

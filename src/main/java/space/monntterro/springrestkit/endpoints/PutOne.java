@@ -3,6 +3,7 @@ package space.monntterro.springrestkit.endpoints;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,7 @@ public interface PutOne<TEntity, TId, TDto> extends BaseKitRestController<TEntit
             @ApiResponse(responseCode = "404", description = "Сущность с указанным ID не найдена"),
     })
     @PutMapping("/{id}")
-    default TDto updateOne(@PathVariable("id") TId id, @RequestBody TDto dto) {
+    default TDto updateOne(@Valid @PathVariable("id") TId id, @RequestBody TDto dto) {
         TEntity entity = getService().updateOne(id, dto);
         return getMapper().toDto(entity);
     }
