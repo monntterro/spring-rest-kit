@@ -1,6 +1,28 @@
 # 📚 Документация Spring REST Kit
 
+## 📝 Замечания и рекомендации
+
+1. **Обработчик исключений** — создайте класс с `@RestControllerAdvice`, реализующий `BaseKitExceptionHandler`
+2. **Валидация** — используйте аннотации `@Valid`, `@NotNull`, `@NotBlank`, `@Email` и другие в DTO для автоматической
+   валидации
+3. **Используйте ApiException** для своих ошибок — они автоматически обработаются
+4. **NotFoundException** автоматически выбрасывается в AbstractKitService при отсутствии сущности
+5. Все HTTP-методы имеют встроенную Swagger-документацию, которую можно переопределить
+6. Для уточнения сущности в Swagger используйте `@Tag` на контроллере
+7. Методы `PostOne` и `PutOne` автоматически валидируют входящие DTO с помощью `@Valid`
+
 ## 🛠 Основные компоненты
+
+### Модульные HTTP-методы
+
+Интерфейсы с default-реализацией для выборочного подключения:
+
+* **GetOne<TEntity, TId, TDto>** — `GET /{id}`
+* **GetAll<TEntity, TId, TDto>** — `GET /` (без пагинации)
+* **GetAllPageable<TEntity, TId, TDto>** — `GET /` (с пагинацией)
+* **PostOne<TEntity, TId, TDto>** — `POST /` (с автоматической валидацией `@Valid`)
+* **PutOne<TEntity, TId, TDto>** — `PUT /{id}` (с автоматической валидацией `@Valid`)
+* **DeleteOne<TEntity, TId, TDto>** — `DELETE /{id}`
 
 ### Готовые контроллеры
 
@@ -20,143 +42,6 @@
 * **BaseKitRepository<TEntity, TId>** — контракт репозитория (findById, findAll, save, deleteById)
 * **BaseKitPageableRepository<TEntity, TId>** — репозиторий с методом findAll(Pageable)
 * **BaseKitMapper<TEntity, TDto>** — маппер (toDto, toEntity, updateWithNull)
-
-### Обработка ошибок
-
-#### BaseKitExceptionHandler
-
-Интерфейс для централизованной обработки исключений. Нужно создать класс, реализующий этот интерфейс, и
-пометить его аннотацией `@RestControllerAdvice`.
-
-**Возможности:**
-
-- Содержит готовый обработчик `handleHttpServerErrorException(ApiException e)` для всех ApiException
-- Содержит готовый обработчик `handleValidationExceptions(MethodArgumentNotValidException e)` для валидации `@Valid`
-- Можно переопределить стандартные обработчики
-- Можно добавить свои обработчики для других исключений
-
-**Пример:**
-
-```java
-
-@RestControllerAdvice
-public class GlobalExceptionHandler implements BaseKitExceptionHandler {
-    // handleHttpServerErrorException и handleValidationExceptions уже реализованы в интерфейсе
-
-    // Можно переопределить стандартный обработчик ApiException
-    @Override
-    public ProblemDetail handleHttpServerErrorException(ApiException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(e.getStatusCode());
-        problemDetail.setTitle("Кастомный заголовок");
-        problemDetail.setDetail(e.getReason());
-        return problemDetail;
-    }
-
-    // Можно переопределить стандартный обработчик валидации
-    @Override
-    public ProblemDetail handleValidationExceptions(MethodArgumentNotValidException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problemDetail.setTitle("Ошибка валидации данных");
-
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
-            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-        }
-
-        problemDetail.setProperty("errors", errors);
-        return problemDetail;
-    }
-
-    // Или добавить свои обработчики
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ProblemDetail handleIllegalArgument(IllegalArgumentException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-}
-```
-
-#### Встроенная валидация
-
-Библиотека автоматически обрабатывает валидацию `@Valid` в методах `PostOne` и `PutOne`. При ошибке валидации
-возвращается RFC 7807 Problem Details с детальной информацией о каждом невалидном поле.
-
-**Пример DTO с валидацией:**
-
-```java
-public class UserDto {
-    private Long id;
-
-    @NotBlank(message = "Имя обязательно для заполнения")
-    @Size(min = 2, max = 50, message = "Имя должно быть от 2 до 50 символов")
-    private String name;
-
-    @NotBlank(message = "Email обязателен для заполнения")
-    @Email(message = "Email должен быть корректным")
-    private String email;
-
-    @Min(value = 18, message = "Возраст должен быть не менее 18 лет")
-    private Integer age;
-}
-```
-
-**Пример ответа при ошибке валидации:**
-
-```json
-{
-  "type": "about:blank",
-  "title": "Validation failed",
-  "status": 400,
-  "errors": {
-    "name": "Имя обязательно для заполнения",
-    "email": "Email должен быть корректным",
-    "age": "Возраст должен быть не менее 18 лет"
-  }
-}
-```
-
-#### ApiException
-
-Базовый класс для всех REST-ошибок. Все исключения, наследующие `ApiException`, **автоматически обрабатываются** методом
-`handleHttpServerErrorException` из `BaseKitExceptionHandler`.
-
-**Возможности:**
-
-- Наследуется от `ResponseStatusException`
-- Принимает `HttpStatus` и сообщение об ошибке
-- Автоматически преобразуется в RFC 7807 Problem Details
-
-**Встроенные исключения:**
-
-- `NotFoundException` — 404 ошибка с автоматическим формированием сообщения
-
-**Создание своих исключений:**
-
-```java
-public class ValidationException extends ApiException {
-    public ValidationException(String reason) {
-        super(HttpStatus.BAD_REQUEST, reason);
-    }
-}
-
-public class ForbiddenException extends ApiException {
-    public ForbiddenException(String reason) {
-        super(HttpStatus.FORBIDDEN, reason);
-    }
-}
-```
-
-Все созданные исключения будут автоматически обрабатываться `BaseKitExceptionHandler`.
-
-### Модульные HTTP-методы
-
-Интерфейсы с default-реализацией для выборочного подключения:
-
-* **GetOne<TEntity, TId, TDto>** — `GET /{id}`
-* **GetAll<TEntity, TId, TDto>** — `GET /` (без пагинации)
-* **GetAllPageable<TEntity, TId, TDto>** — `GET /` (с пагинацией)
-* **PostOne<TEntity, TId, TDto>** — `POST /` (с автоматической валидацией `@Valid`)
-* **PutOne<TEntity, TId, TDto>** — `PUT /{id}` (с автоматической валидацией `@Valid`)
-* **DeleteOne<TEntity, TId, TDto>** — `DELETE /{id}`
 
 ## ✨ Примеры использования
 
@@ -220,6 +105,8 @@ public class UserController extends CrudKitController<UserEntity, Long, UserDto>
 
 ### Полный CRUD с пагинацией
 
+Нужно только заменить основные компоненты на `Pageable` версии
+
 ```java
 // Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, Long>,
@@ -244,6 +131,158 @@ public class OrderController extends CrudKitPageableController<OrderEntity, Long
     }
 }
 ```
+
+### Кастомная комбинация методов
+
+Можно определить только нужные методы
+
+```java
+
+@RestController
+@RequestMapping("/api/products")
+@Tag(name = "Товары")
+public class ProductController extends AbstractKitController<ProductEntity, Long, ProductDto>
+        implements GetAll<ProductEntity, Long, ProductDto>,
+        GetOne<ProductEntity, Long, ProductDto> {
+
+    public ProductController(ProductService service, ProductMapper mapper) {
+        super(service, mapper);
+    }
+
+    @GetMapping("/search")
+    public Collection<ProductDto> search(@RequestParam String query) {
+        // Кастомная логика
+    }
+}
+```
+
+## 🛑 Обработка ошибок
+
+### BaseKitExceptionHandler
+
+Интерфейс для централизованной обработки исключений. Нужно создать класс, реализующий этот интерфейс, и
+пометить его аннотацией `@RestControllerAdvice`.
+
+**Возможности:**
+
+- Содержит готовый обработчик `handleHttpServerErrorException(ApiException e)` для всех ApiException
+- Содержит готовый обработчик `handleValidationExceptions(MethodArgumentNotValidException e)` для валидации `@Valid`
+- Можно переопределить стандартные обработчики
+- Можно добавить свои обработчики для других исключений
+
+**Пример:**
+
+```java
+
+@RestControllerAdvice
+public class GlobalExceptionHandler implements BaseKitExceptionHandler {
+    // handleHttpServerErrorException и handleValidationExceptions уже реализованы в интерфейсе
+
+    // Можно переопределить стандартный обработчик ApiException
+    @Override
+    public ProblemDetail handleHttpServerErrorException(ApiException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(e.getStatusCode());
+        problemDetail.setTitle("Кастомный заголовок");
+        problemDetail.setDetail(e.getReason());
+        return problemDetail;
+    }
+
+    // Можно переопределить стандартный обработчик валидации
+    @Override
+    public ProblemDetail handleValidationExceptions(MethodArgumentNotValidException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Ошибка валидации данных");
+
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
+    }
+
+    // Или добавить свои обработчики
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+}
+```
+
+### Встроенная валидация
+
+Библиотека автоматически обрабатывает валидацию `@Valid` в методах `PostOne` и `PutOne`. При ошибке валидации
+возвращается RFC 7807 Problem Details с детальной информацией о каждом невалидном поле.
+
+**Пример DTO с валидацией:**
+
+```java
+public class UserDto {
+    private Long id;
+
+    @NotBlank(message = "Имя обязательно для заполнения")
+    @Size(min = 2, max = 50, message = "Имя должно быть от 2 до 50 символов")
+    private String name;
+
+    @NotBlank(message = "Email обязателен для заполнения")
+    @Email(message = "Email должен быть корректным")
+    private String email;
+
+    @Min(value = 18, message = "Возраст должен быть не менее 18 лет")
+    private Integer age;
+}
+```
+
+**Пример ответа при ошибке валидации:**
+
+```json
+{
+  "type": "about:blank",
+  "title": "Validation failed",
+  "status": 400,
+  "errors": {
+    "name": "Имя обязательно для заполнения",
+    "email": "Email должен быть корректным",
+    "age": "Возраст должен быть не менее 18 лет"
+  }
+}
+```
+
+### ApiException
+
+Базовый класс для всех REST-ошибок. Все исключения, наследующие `ApiException`, **автоматически обрабатываются** методом
+`handleHttpServerErrorException` из `BaseKitExceptionHandler`.
+
+**Возможности:**
+
+- Наследуется от `ResponseStatusException`
+- Принимает `HttpStatus` и сообщение об ошибке
+- Автоматически преобразуется в RFC 7807 Problem Details
+
+**Встроенные исключения:**
+
+- `NotFoundException` — 404 ошибка с автоматическим формированием сообщения
+
+**Создание своих исключений:**
+
+```java
+public class ValidationException extends ApiException {
+    public ValidationException(String reason) {
+        super(HttpStatus.BAD_REQUEST, reason);
+    }
+}
+
+public class ForbiddenException extends ApiException {
+    public ForbiddenException(String reason) {
+        super(HttpStatus.FORBIDDEN, reason);
+    }
+}
+```
+
+Все созданные исключения будут автоматически обрабатываться `BaseKitExceptionHandler`.
+
+## ✨ Дополнительные примеры
 
 ### Кастомная комбинация методов
 
@@ -357,14 +396,3 @@ public class UserService extends AbstractKitService<UserEntity, Long, UserDto> {
     }
 }
 ```
-
-## 📝 Замечания и рекомендации
-
-1. **Обработчик исключений** — создайте класс с `@RestControllerAdvice`, реализующий `BaseKitExceptionHandler`
-2. **Валидация** — используйте аннотации `@Valid`, `@NotNull`, `@NotBlank`, `@Email` и другие в DTO для автоматической
-   валидации
-3. **Используйте ApiException** для своих ошибок — они автоматически обработаются
-4. **NotFoundException** автоматически выбрасывается в AbstractKitService при отсутствии сущности
-5. Все HTTP-методы имеют встроенную Swagger-документацию, которую можно переопределить
-6. Для уточнения сущности в Swagger используйте `@Tag` на контроллере
-7. Методы `PostOne` и `PutOne` автоматически валидируют входящие DTO с помощью `@Valid`
