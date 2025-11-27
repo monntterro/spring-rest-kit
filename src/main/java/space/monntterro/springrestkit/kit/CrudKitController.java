@@ -1,7 +1,7 @@
 package space.monntterro.springrestkit.kit;
 
+import space.monntterro.springrestkit.core.endpoints.*;
 import space.monntterro.springrestkit.core.mapper.BaseKitMapper;
-import space.monntterro.springrestkit.endpoints.*;
 import space.monntterro.springrestkit.impl.controller.AbstractKitController;
 import space.monntterro.springrestkit.impl.service.AbstractKitService;
 
