@@ -9,7 +9,7 @@ public interface BaseKitRepository<TEntity, TId> {
 
     Collection<TEntity> findAll();
 
-    TEntity save(TEntity entity);
+    <S extends TEntity> S save(S entity);
 
     void deleteById(TId id);
 }
